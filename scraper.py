@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import pdfplumber
 
 # --- Baixar o boletim mais recente da Sema ---
 url_base = "https://www.semace.ce.gov.br/boletim-de-balneabilidade/"
@@ -28,3 +29,10 @@ with open(arquivo_pdf, "wb") as f:
         f.write(chunk)
 
 print(f"PDF salvo em {arquivo_pdf}")
+
+
+arquivo_pdf = "boletim_fortaleza.pdf"
+
+with pdfplumber.open(arquivo_pdf) as pdf:
+    texto_pg1 = pdf.pages[0].extract_text() #extrai o texto da primeira página do pdf
+    print("Texto da primeira página:", texto_pg1[:200])  # só primeiros 200 chars
