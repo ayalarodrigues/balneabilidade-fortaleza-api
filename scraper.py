@@ -17,3 +17,14 @@ if not links_boletim:
 
 ultimo_boletim_url = urljoin(url_base, links_boletim[0])
 print("Último boletim:", ultimo_boletim_url)
+
+
+#--- Baixar o arquivo .pdf ---
+res = requests.get(ultimo_boletim_url, stream=True) #faz uma requisição HTTP para baixar o arquivo PDF do boletim
+arquivo_pdf = "boletim_fortaleza.pdf"
+with open(arquivo_pdf, "wb") as f:
+    for chunk in res.iter_content(8192): #8192 = 8KB por vez
+        #o arquivo é baixo em partes(chunks) para evitar que seja carregado todo de uma vez na memória
+        f.write(chunk)
+
+print(f"PDF salvo em {arquivo_pdf}")
