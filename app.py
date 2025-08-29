@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 import json
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False 
@@ -18,6 +19,27 @@ praia = [
     {
         'id': 2,
         'nome': "P de Iracema",
+        'status': "I",
+        'zona': "Centro",
+        'periodo': "11/08/2025 a 17/08/2025",
+        'tipos_amostragem': "Águas procedentes das praias",
+        'data_extracao': "2025-08-14"
+    },
+
+    {
+        'id': 2,
+        'nome': "P de Iracema",
+        'status': "I",
+        'zona': "Centro",
+        'periodo': "11/08/2025 a 17/08/2025",
+        'tipos_amostragem': "Águas procedentes das praias",
+        'data_extracao': "2025-08-14"
+    },
+
+
+     {
+        'id': 3,
+        'nome': "P da Barra",
         'status': "I",
         'zona': "Centro",
         'periodo': "11/08/2025 a 17/08/2025",
@@ -62,6 +84,10 @@ def get_praia_por_data(data):
     if not resultado:
         return jsonify({'message': f'Nenhuma praia encontrada na data {data}'})
     return jsonify(resultado)
+
+# Status de uma praia no dia de hoje
+
+    return jsonify({"message": f"Praia com id {praia_id} não possui boletim válido para hoje"})
     
 
 app.run(port=5000)
