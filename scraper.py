@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 import pdfplumber
+import unicodedata
+from datetime import datetime, timedelta
 
 # --- Baixar o boletim mais recente da Sema ---
 url_base = "https://www.semace.ce.gov.br/boletim-de-balneabilidade/"
@@ -36,3 +38,27 @@ arquivo_pdf = "boletim_fortaleza.pdf"
 with pdfplumber.open(arquivo_pdf) as pdf:
     texto_pg1 = pdf.pages[0].extract_text() #extrai o texto da primeira página do pdf
     print("Texto da primeira página:", texto_pg1[:200])  # só primeiros 200 chars
+
+# --- Remove acentos e sinais de uma string ---
+def strip_accents(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn") # filtra apenas os caracteres que não são marcas de acento (categoria Mn = Mark, Nonspacing)
+
+# normaliza a string para a forma NFD (Normalization Form Decomposition),
+# que decompõe caracteres acentuados em caractere base + acento.
+# Exemplo: "á" -> "a" + "´"
+
+
+# --- Classificação das zonas com base no nome das praias ----
+def classify_zona(nome: str) -> str:
+    """Classifica a zona da praia com base no nome"""
+    n = strip_accents((nome or "").lower())
+    leste_kw = ["futuro", "caca e pesca", "abreulandia", "sabiaguaba", "titanzinho"]
+    centro_kw = ["iracema", "meireles", "mucuripe", "volta da jurema", "beira mar", "estressados"]
+    oeste_kw = ["barra do ceara", "pirambu", "cristo redentor", "leste oeste", "formosa", "colonia"]
+
+    if any(k in n for k in leste_kw): return "Leste"
+    if any(k in n for k in centro_kw): return "Centro"
+    if any(k in n for k in oeste_kw): return "Oeste"
+    return "Desconhecida"
+
+print(classify_zona("Praia do Pirambu"))
