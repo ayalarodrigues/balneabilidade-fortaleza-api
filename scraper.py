@@ -19,7 +19,7 @@ if not links_boletim:
     raise ValueError("Nenhum boletim encontrado.")
 
 ultimo_boletim_url = urljoin(url_base, links_boletim[0])
-print("Último boletim:", ultimo_boletim_url)
+#print("Último boletim:", ultimo_boletim_url)
 
 
 #--- Baixar o arquivo .pdf ---
@@ -62,3 +62,35 @@ def classify_zona(nome: str) -> str:
     return "Desconhecida"
 
 print(classify_zona("Praia do Pirambu"))
+
+
+#--- Recebe um período e define os dias dentro dele ---
+def expand_periodo(periodo_str: str):
+    try:
+        #divide a string pelo "a" que separa as datas
+        #exemplo: "11/08/2025 a 17/08/2025" -> ["11/08/2025", "17/08/2025"]
+        inicio_str, fim_str = [p.strip() for p in periodo_str.split("a")]
+
+        #converte as strings de data para objetos datetime
+        dt_inicio = datetime.strptime(inicio_str, "%d/%m/%Y")
+        dt_fim = datetime.strptime(fim_str, "%d/%m/%Y")
+        
+        #cria uma lista para armazenar as datas do período
+        dias = []
+        #começa a partir da data inicial
+        atual = dt_inicio
+
+        #enquanto a data atual for menor ou igual à data final
+        while atual <= dt_fim:
+
+            #converte a data atual para string no formato "YYYY-MM-DD"
+            dias.append(atual.strftime("%Y-%m-%d"))
+             #incrementa um dia
+            atual += timedelta(days=1)
+        return dias
+        #retorna a lista de todas as datas no período
+    except Exception:
+        return []
+
+print(expand_periodo("11/08/2025 a 17/08/2025"))
+
