@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 import pdfplumber
 import unicodedata
 from datetime import datetime, timedelta
+import camelot
 
 # --- Baixar o boletim mais recente da Sema ---
 url_base = "https://www.semace.ce.gov.br/boletim-de-balneabilidade/"
@@ -92,5 +93,16 @@ def expand_periodo(periodo_str: str):
     except Exception:
         return []
 
-print(expand_periodo("11/08/2025 a 17/08/2025"))
+#print(expand_periodo("11/08/2025 a 17/08/2025"))
+
+# --- Extração das tabelas ---
+arquivo_pdf = "boletim_fortaleza.pdf"
+
+#extrai todas as tabelas do boletim
+tables = camelot.read_pdf(arquivo_pdf, pages="1-end", flavor="stream")
+print("Total de tabelas encontradas:", len(tables))
+
+#exibe as primeiras linhas da primeira tabela
+if tables:
+    print(tables[0].df.head())
 
