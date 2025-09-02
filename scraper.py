@@ -206,5 +206,16 @@ df["Numero_Boletim"] = numero_boletim
 df["Tipos_Amostragem"] = tipos_amostragem
 df["Data_Extração"] = data_extracao
 
+#teste
 print("Metadados adicionados ao dataset:")
 print(df[["Nome", "Periodo", "Numero_Boletim", "Tipos_Amostragem"]].head())
+
+#traduz status para própria para banho ou imprópria para banho
+df["Status"] = df["Status"].map({
+    "P": "Própria para banho",
+    "I": "Imprópria para banho"
+})
+
+print("Status traduzidos:")
+print(df[["Nome", "Status"]].head())
+
