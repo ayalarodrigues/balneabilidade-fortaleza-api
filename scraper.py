@@ -5,6 +5,7 @@ import pdfplumber
 import unicodedata
 from datetime import datetime, timedelta
 import camelot
+import pandas as pd
 
 # --- Baixar o boletim mais recente da Sema ---
 url_base = "https://www.semace.ce.gov.br/boletim-de-balneabilidade/"
@@ -105,4 +106,79 @@ print("Total de tabelas encontradas:", len(tables))
 #exibe as primeiras linhas da primeira tabela
 if tables:
     print(tables[0].df.head())
+
+
+#--- Filtragem de dados da tabela e normalização ---
+
+#limpezado dos status em 'P' ou 'I'
+def clean_status_token(tok: str) -> str:
+
+    #remove espaços extras e converte para maiúscula
+    tok = tok.strip().upper()
+    #retorna apenas se for P (Própria) ou I (Imprópria), caso contrário retorna vazio
+    return tok if tok in ("P", "I") else ""
+
+#verifica se a linha é ruído (não contém informação válida de praia)
+def is_noise_row(nome: str, status: str) -> bool:
+    #junta nome e status em uma string só (em minúsculo)
+    txt = f"{str(nome)} {str(status)}".lower()
+    #palavras-chave que indicam linha inútil (títulos, rodapés, cabeçalhos, etc.)
+    noise_terms = ["nome", "status", "trecho", "ponto", "boletim", "semace"]
+    #se a linha tiver menos de 3 caracteres, é descartada
+    if len(txt.strip()) < 3:
+        return True
+    #se tiber qualquer palavra de ruído, também é descartada
+    return any(term in txt for term in noise_terms)
+
+
+#lista para acumular dfs
+dfs_norm = []
+
+#iteração sobre todas as tabelas detectadas pelo Camelot
+for t in tables:
+    df_raw = t.df.copy()  #copia a tabela bruta
+    if df_raw.shape[1] < 2:
+        continue  #ignora tabelas inválidas com menos de 2 colunas
+
+    #mantém apenas as duas primeiras colunas (Nome e Status)
+    df_raw = df_raw.iloc[:, :2]
+    df_raw.columns = ["Nome", "Status"]
+
+    linhas = []  #lista para armazenar os registros válidos
+
+    #percorre cada linha da tabela
+    for _, row in df_raw.iterrows():
+        #quebra o campo "Nome" em várias linhas (caso contenha "\n") e remove espaços extras
+        nomes = [x.strip() for x in row["Nome"].split("\n") if x.strip()]
+        #faz o mesmo para "Status", limpando os tokens com clean_status_token
+        status_tokens = [clean_status_token(x) for x in row["Status"].split("\n")]
+        status_tokens = [x for x in status_tokens if x]  # remove vazios
+
+        #caso não não tem nome ou status, pula a linha
+        if not nomes or not status_tokens:
+            continue
+
+        #isso aqui é para corrigir um caso em que vários status apareciam para uma única linha; 
+        #um único status para várias praias (ex: várias linhas de nomes, mas só um "P")
+        if len(status_tokens) == 1 and len(nomes) > 1:
+            for n in nomes:
+                if not is_noise_row(n, status_tokens[0]):
+                    linhas.append({"Nome": n, "Status": status_tokens[0]})
+        else:
+            #caso mais comum: cada nome tem um status correspondente
+            #verificar esse zip
+            for n, s in zip(nomes, status_tokens):
+                if not is_noise_row(n, s):
+                    linhas.append({"Nome": n, "Status": s})
+
+    #se encontrou linhas válidas nessa tabela, adiciona ao conjunto
+    if linhas:
+        dfs_norm.append(pd.DataFrame(linhas))
+
+#junta todos os dfs das tabelas em um só
+df = pd.concat(dfs_norm, ignore_index=True) if dfs_norm else pd.DataFrame(columns=["Nome","Status"])
+
+#teste
+print(df.head())
+
 
