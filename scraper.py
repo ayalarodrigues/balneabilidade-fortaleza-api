@@ -227,3 +227,12 @@ df.insert(0, "id", range(1, len(df) + 1))
 print("Dataset com ID sequencial:")
 print(df.head())
 
+# --- Salvar os dados em .csv ---
+
+arquivo_csv = "boletim_fortaleza.csv"
+df.to_csv(arquivo_csv, index=False, encoding="utf-8")
+print(f"CSV salvo em: {arquivo_csv}")
+
+#teste
+print("Prévia do CSV exportado:")
+print(df.head(10))
