@@ -197,3 +197,14 @@ df = df.drop_duplicates(subset=["Nome"]).reset_index(drop=True)
 #teste
 print(df)
 
+# --- Dados da amostragem
+
+df["Zona"] = df["Nome"].apply(classify_zona)
+df["Periodo"] = periodo
+df["Dias_Periodo"] = [", ".join(dias_periodo)] * len(df)
+df["Numero_Boletim"] = numero_boletim
+df["Tipos_Amostragem"] = tipos_amostragem
+df["Data_Extração"] = data_extracao
+
+print("Metadados adicionados ao dataset:")
+print(df[["Nome", "Periodo", "Numero_Boletim", "Tipos_Amostragem"]].head())
