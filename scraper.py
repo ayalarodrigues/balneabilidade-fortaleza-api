@@ -216,6 +216,14 @@ df["Status"] = df["Status"].map({
     "I": "Imprópria para banho"
 })
 
+#teste
 print("Status traduzidos:")
 print(df[["Nome", "Status"]].head())
+
+#coluna com os ids para cada praia
+df.insert(0, "id", range(1, len(df) + 1))
+
+#teste
+print("Dataset com ID sequencial:")
+print(df.head())
 
