@@ -7,6 +7,53 @@ from datetime import datetime, timedelta
 import camelot
 import pandas as pd
 
+# --- Recebe um período e define os dias dentro dele ---
+def expand_periodo(periodo_str: str):
+    try:
+        #divide a string pelo "a" que separa as datas
+        #exemplo: "11/08/2025 a 17/08/2025" -> ["11/08/2025", "17/08/2025"]
+        inicio_str, fim_str = [p.strip() for p in periodo_str.split("a")]
+
+        #converte as strings de data para objetos datetime
+        dt_inicio = datetime.strptime(inicio_str, "%d/%m/%Y")
+        dt_fim = datetime.strptime(fim_str, "%d/%m/%Y")
+        
+        #cria uma lista para armazenar as datas do período
+        dias = []
+        #começa a partir da data inicial
+        atual = dt_inicio
+
+        #enquanto a data atual for menor ou igual à data final
+        while atual <= dt_fim:
+
+            #converte a data atual para string no formato "YYYY-MM-DD"
+            dias.append(atual.strftime("%Y-%m-%d"))
+            #incrementa um dia
+            atual += timedelta(days=1)
+        return dias
+        #retorna a lista de todas as datas no período
+    except Exception:
+        return []
+
+# --- Remove acentos e sinais de uma string ---
+def strip_accents(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn") # filtra apenas os caracteres que não são marcas de acento (categoria Mn = Mark, Nonspacing)
+
+# --- Classificação das zonas com base no nome das praias ----
+def classify_zona(nome: str) -> str:
+    """Classifica a zona da praia com base no nome"""
+    n = strip_accents((nome or "").lower())
+    leste_kw = ["futuro", "caca e pesca", "abreulandia", "sabiaguaba", "titanzinho"]
+    centro_kw = ["iracema", "meireles", "mucuripe", "volta da jurema", "beira mar", "estressados"]
+    oeste_kw = ["barra do ceara", "pirambu", "cristo redentor", "leste oeste", "formosa", "colonia"]
+
+    if any(k in n for k in leste_kw): return "Leste"
+    if any(k in n for k in centro_kw): return "Centro"
+    if any(k in n for k in oeste_kw): return "Oeste"
+    return "Desconhecida"
+
+print(classify_zona("Praia do Pirambu"))
+
 # --- Baixar o boletim mais recente da Sema ---
 url_base = "https://www.semace.ce.gov.br/boletim-de-balneabilidade/"
 res = requests.get(url_base)
@@ -23,7 +70,6 @@ if not links_boletim:
 ultimo_boletim_url = urljoin(url_base, links_boletim[0])
 #print("Último boletim:", ultimo_boletim_url)
 
-
 #--- Baixar o arquivo .pdf ---
 res = requests.get(ultimo_boletim_url, stream=True) #faz uma requisição HTTP para baixar o arquivo PDF do boletim
 arquivo_pdf = "boletim_fortaleza.pdf"
@@ -34,9 +80,7 @@ with open(arquivo_pdf, "wb") as f:
 
 print(f"PDF salvo em {arquivo_pdf}")
 
-
 #--- Extração de metadados ---
-
 arquivo_pdf = "boletim_fortaleza.pdf"
 
 with pdfplumber.open(arquivo_pdf) as pdf:
@@ -63,62 +107,6 @@ if "Nº" in texto_pg1 and "Período:" in texto_pg1 and "Tipos de amostras:" in t
 dias_periodo = expand_periodo(periodo)
 data_extracao = datetime.today().strftime("%Y-%m-%d")
 
-
-# --- Remove acentos e sinais de uma string ---
-def strip_accents(s: str) -> str:
-    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn") # filtra apenas os caracteres que não são marcas de acento (categoria Mn = Mark, Nonspacing)
-
-# normaliza a string para a forma NFD (Normalization Form Decomposition),
-# que decompõe caracteres acentuados em caractere base + acento.
-# Exemplo: "á" -> "a" + "´"
-
-
-# --- Classificação das zonas com base no nome das praias ----
-def classify_zona(nome: str) -> str:
-    """Classifica a zona da praia com base no nome"""
-    n = strip_accents((nome or "").lower())
-    leste_kw = ["futuro", "caca e pesca", "abreulandia", "sabiaguaba", "titanzinho"]
-    centro_kw = ["iracema", "meireles", "mucuripe", "volta da jurema", "beira mar", "estressados"]
-    oeste_kw = ["barra do ceara", "pirambu", "cristo redentor", "leste oeste", "formosa", "colonia"]
-
-    if any(k in n for k in leste_kw): return "Leste"
-    if any(k in n for k in centro_kw): return "Centro"
-    if any(k in n for k in oeste_kw): return "Oeste"
-    return "Desconhecida"
-
-print(classify_zona("Praia do Pirambu"))
-
-
-#--- Recebe um período e define os dias dentro dele ---
-def expand_periodo(periodo_str: str):
-    try:
-        #divide a string pelo "a" que separa as datas
-        #exemplo: "11/08/2025 a 17/08/2025" -> ["11/08/2025", "17/08/2025"]
-        inicio_str, fim_str = [p.strip() for p in periodo_str.split("a")]
-
-        #converte as strings de data para objetos datetime
-        dt_inicio = datetime.strptime(inicio_str, "%d/%m/%Y")
-        dt_fim = datetime.strptime(fim_str, "%d/%m/%Y")
-        
-        #cria uma lista para armazenar as datas do período
-        dias = []
-        #começa a partir da data inicial
-        atual = dt_inicio
-
-        #enquanto a data atual for menor ou igual à data final
-        while atual <= dt_fim:
-
-            #converte a data atual para string no formato "YYYY-MM-DD"
-            dias.append(atual.strftime("%Y-%m-%d"))
-             #incrementa um dia
-            atual += timedelta(days=1)
-        return dias
-        #retorna a lista de todas as datas no período
-    except Exception:
-        return []
-
-#print(expand_periodo("11/08/2025 a 17/08/2025"))
-
 # --- Extração das tabelas ---
 arquivo_pdf = "boletim_fortaleza.pdf"
 
@@ -130,12 +118,10 @@ print("Total de tabelas encontradas:", len(tables))
 if tables:
     print(tables[0].df.head())
 
-
 #--- Filtragem de dados da tabela e normalização ---
 
-#limpezado dos status em 'P' ou 'I'
+#limpeza dos status em 'P' ou 'I'
 def clean_status_token(tok: str) -> str:
-
     #remove espaços extras e converte para maiúscula
     tok = tok.strip().upper()
     #retorna apenas se for P (Própria) ou I (Imprópria), caso contrário retorna vazio
@@ -150,9 +136,8 @@ def is_noise_row(nome: str, status: str) -> bool:
     #se a linha tiver menos de 3 caracteres, é descartada
     if len(txt.strip()) < 3:
         return True
-    #se tiber qualquer palavra de ruído, também é descartada
+    #se tiver qualquer palavra de ruído, também é descartada
     return any(term in txt for term in noise_terms)
-
 
 #lista para acumular dfs
 dfs_norm = []
@@ -203,55 +188,3 @@ df = pd.concat(dfs_norm, ignore_index=True) if dfs_norm else pd.DataFrame(column
 
 #teste
 print(df.head())
-
-
-
-# --- Limpar campo 'Nome' ----
-
-#remove espaços extras entre palavras do nome da praia
-#exemplo: "  Praia   do Futuro " -> "Praia do Futuro"  esse caso de fato ocorre na tabela do pdf
-df["Nome"] = df["Nome"].apply(lambda x: " ".join(x.split())) #função anônima = pensada para a disciplina de programação funcional
-
-
-# --- Adicionar informações extras ---
-
-# criauma nova coluna "Zona" a partir da função classify_zona
-# exemplo: "Praia do Futuro" -> "Leste"
-df["Zona"] = df["Nome"].apply(classify_zona)
-
-
-#coloca na coluna "Periodo" o período do boletim coletado (ex: "11/08/2025 a 17/08/2025")
-df["Periodo"] = periodo
-
-#expande o período em uma lista de dias e salva em string
-#a mesma lista de dias é repetida para todas as praias (len(df) vezes)
-df["Dias_Periodo"] = [", ".join(expand_periodo(periodo))] * len(df)
-
-
-
-# ---Traduz status ---
-#cnverte "P" em "Própria para banho" e "I" em "Imprópria para banho"
-df["Status"] = df["Status"].map({
-    "P": "Própria para banho",
-    "I": "Imprópria para banho"
-})
-
-# ---Adiciona metadados ---
-#número do boletim atual
-df["Numero_Boletim"] = numero_boletim
-
-#tipo de amostragem (informação que a Semace traz no PDF)
-df["Tipos_Amostragem"] = tipos_amostragem
-
-#daata em que o script foi executado (extração)
-df["Data_Extracao"] = datetime.today().strftime("%Y-%m-%d")
-
-
-
-#cria uma coluna "id" com números sequenciais (1, 2, 3, ...)
-#e insere essa coluna na primeira posição do DataFrame
-df.insert(0, "id", range(1, len(df) + 1))
-
-
-#teste
-print(df.head(10))
