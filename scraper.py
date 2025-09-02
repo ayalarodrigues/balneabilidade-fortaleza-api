@@ -35,11 +35,34 @@ with open(arquivo_pdf, "wb") as f:
 print(f"PDF salvo em {arquivo_pdf}")
 
 
+#--- Extração de metadados ---
+
 arquivo_pdf = "boletim_fortaleza.pdf"
 
 with pdfplumber.open(arquivo_pdf) as pdf:
-    texto_pg1 = pdf.pages[0].extract_text() #extrai o texto da primeira página do pdf
-    print("Texto da primeira página:", texto_pg1[:200])  # só primeiros 200 chars
+    texto_pg1 = pdf.pages[0].extract_text()
+    texto_pg1 = " ".join(texto_pg1.split())  # tudo em uma linha
+
+periodo = ""
+numero_boletim = ""
+tipos_amostragem = ""
+
+if "Nº" in texto_pg1 and "Período:" in texto_pg1 and "Tipos de amostras:" in texto_pg1:
+    bol_index = texto_pg1.find("Nº")
+    per_index = texto_pg1.find("Período:", bol_index)
+    tipos_index = texto_pg1.find("Tipos de amostras:", per_index)
+
+    numero_boletim = texto_pg1[bol_index + 2:per_index].strip()
+    periodo = texto_pg1[per_index + len("Período:"):tipos_index].strip()
+
+    # pega só até o primeiro ponto final (.)
+    resto = texto_pg1[tipos_index + len("Tipos de amostras:"):].strip()
+    tipos_amostragem = resto.split(".")[0].strip()
+
+# gera lista de dias a partir do período
+dias_periodo = expand_periodo(periodo)
+data_extracao = datetime.today().strftime("%Y-%m-%d")
+
 
 # --- Remove acentos e sinais de uma string ---
 def strip_accents(s: str) -> str:
@@ -182,3 +205,53 @@ df = pd.concat(dfs_norm, ignore_index=True) if dfs_norm else pd.DataFrame(column
 print(df.head())
 
 
+
+# --- Limpar campo 'Nome' ----
+
+#remove espaços extras entre palavras do nome da praia
+#exemplo: "  Praia   do Futuro " -> "Praia do Futuro"  esse caso de fato ocorre na tabela do pdf
+df["Nome"] = df["Nome"].apply(lambda x: " ".join(x.split())) #função anônima = pensada para a disciplina de programação funcional
+
+
+# --- Adicionar informações extras ---
+
+# criauma nova coluna "Zona" a partir da função classify_zona
+# exemplo: "Praia do Futuro" -> "Leste"
+df["Zona"] = df["Nome"].apply(classify_zona)
+
+
+#coloca na coluna "Periodo" o período do boletim coletado (ex: "11/08/2025 a 17/08/2025")
+df["Periodo"] = periodo
+
+#expande o período em uma lista de dias e salva em string
+#a mesma lista de dias é repetida para todas as praias (len(df) vezes)
+df["Dias_Periodo"] = [", ".join(expand_periodo(periodo))] * len(df)
+
+
+
+# ---Traduz status ---
+#cnverte "P" em "Própria para banho" e "I" em "Imprópria para banho"
+df["Status"] = df["Status"].map({
+    "P": "Própria para banho",
+    "I": "Imprópria para banho"
+})
+
+# ---Adiciona metadados ---
+#número do boletim atual
+df["Numero_Boletim"] = numero_boletim
+
+#tipo de amostragem (informação que a Semace traz no PDF)
+df["Tipos_Amostragem"] = tipos_amostragem
+
+#daata em que o script foi executado (extração)
+df["Data_Extracao"] = datetime.today().strftime("%Y-%m-%d")
+
+
+
+#cria uma coluna "id" com números sequenciais (1, 2, 3, ...)
+#e insere essa coluna na primeira posição do DataFrame
+df.insert(0, "id", range(1, len(df) + 1))
+
+
+#teste
+print(df.head(10))
