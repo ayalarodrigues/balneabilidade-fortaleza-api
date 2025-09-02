@@ -188,3 +188,12 @@ df = pd.concat(dfs_norm, ignore_index=True) if dfs_norm else pd.DataFrame(column
 
 #teste
 print(df.head())
+
+
+# --- Limpeza do campo 'Nome'
+df["Nome"] = df["Nome"].apply(lambda x: " ".join(x.split()))
+df = df.drop_duplicates(subset=["Nome"]).reset_index(drop=True)
+
+#teste
+print(df)
+
