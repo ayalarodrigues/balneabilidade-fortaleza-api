@@ -7,6 +7,12 @@ from datetime import datetime, timedelta
 import camelot
 import pandas as pd
 
+from coordenadas import COORDENADAS_POR_CODIGO
+
+# --- Extrair primeiros caracteres do nome das praias
+def extract_point_code(nome: str) -> str:
+    return (nome[:3] or "").strip().upper()
+
 # --- Recebe um período e define os dias dentro dele ---
 def expand_periodo(periodo_str: str):
     try:
@@ -226,6 +232,18 @@ df.insert(0, "id", range(1, len(df) + 1))
 #teste
 print("Dataset com ID sequencial:")
 print(df.head())
+
+# --- Adicionar coordenadas geográficas ---
+df["Coordenadas"] = df["Nome"].apply(lambda n: COORDENADAS_POR_CODIGO.get(extract_point_code(n), None))
+
+#teste
+print("Amostra de dataset com coordenadas:")
+print(df[["Nome", "Coordenadas"]].head(10))
+
+miss = df["Coordenadas"].isna().sum()
+print(f"Total de pontos SEM coordenadas mapeadas: {miss}")
+
+
 
 # --- Salvar os dados em .csv ---
 
