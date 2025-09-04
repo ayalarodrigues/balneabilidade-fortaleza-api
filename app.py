@@ -15,6 +15,8 @@ except FileNotFoundError:
 
 #converter o df para lista de dicionário
 praias = df.to_dict(orient="records")
+df = pd.read_csv(CSV_FILE, encoding='utf-8')
+
 
 
 
@@ -42,6 +44,19 @@ def home():
     # - ensure_ascii=False: mantém os caracteres acentuados legíveis
     # - indent=4: deixa o JSON formatado, mais fácil de ler
     #retorna um Response com mimetype 'application/json'
+
+#rota para listar todas as praias
+@app.route("/praias")
+def listar_praias():
+    praias_resumo = [
+        {"id": p["id"], "nome": p["Nome"], "zona": p["Zona"]}
+        for p in praias
+    ]
+    #isso aqui é apenas para corrigir o problema dos acentos gráficos
+    return Response(
+    json.dumps(praias_resumo, ensure_ascii=False),
+    mimetype='application/json'
+)
 
 
 
