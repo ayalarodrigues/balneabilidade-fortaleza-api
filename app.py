@@ -58,6 +58,14 @@ def listar_praias():
     mimetype='application/json'
 )
 
+#buscar praia pelo id
+@app.route("/praias/<int:id>")
+def buscar_praia_por_id(id):
+    praia = next((p for p in praias if p["id"] == id), None)
+    if not praia:
+        return jsonify({"message": f"Nenhuma praia encontrada com id {id}"}), 404
+    return jsonify(praia)
+
 
 
 
