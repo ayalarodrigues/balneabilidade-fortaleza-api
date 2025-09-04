@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 import json
 from datetime import datetime
 import pandas as pd
@@ -66,7 +66,19 @@ def buscar_praia_por_id(id):
         return jsonify({"message": f"Nenhuma praia encontrada com id {id}"}), 404
     return jsonify(praia)
 
+#buscar informações das praias pelo id e data
+@app.route("/praias/<int:id>/data")
+def buscar_praia_por_id_e_data(id):
+    #query param: ?data=YYYY-MM-DD
+    data = request.args.get("data")
+    praia = next((p for p in praias if p["id"] == id), None)
+    if not praia:
+        return jsonify({"message": f"Nenhuma praia encontrada com id {id}"}), 404
 
+    if data and data not in str(praia["Dias_Periodo"]).split(", "):
+        return jsonify({"message": f"A praia com id {id} não possui boletim para {data}"}), 404
+
+    return jsonify(praia)
 
 
 
