@@ -6,6 +6,7 @@ import pandas as pd
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False #para suportar acentos
 
+
 # --- Carregar os dados gerados pelo scraper ---
 CSV_FILE = "boletim_fortaleza.csv"
 try:
@@ -99,6 +100,23 @@ def filtrar_por_status(status):
 
     if not resultado:
         return jsonify({"message": f"Nenhuma praia encontrada com status {status_filtrado}"}), 404
+
+    return jsonify(resultado)
+
+
+#buscar praias por zona geográfica (Leste, Centro, Oeste) e data opcional (?data=YYYY-MM-DD)
+@app.route("/praias/zona/<zona>")
+def filtrar_por_zona(zona):
+    data = request.args.get("data")
+    zona_filtrada = zona.capitalize()
+
+    resultado = [p for p in praias if p["Zona"] == zona_filtrada]
+
+    if data:
+        resultado = [p for p in resultado if data in str(p["Dias_Periodo"]).split(", ")]
+
+    if not resultado:
+        return jsonify({"message": f"Nenhuma praia encontrada na zona {zona_filtrada}"}), 404
 
     return jsonify(resultado)
 
