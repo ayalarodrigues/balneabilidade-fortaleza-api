@@ -2,10 +2,20 @@ from flask import Flask, jsonify, Response, request
 import json
 from datetime import datetime
 import pandas as pd
+import subprocess
+import os
+import sys
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False #para suportar acentos
 
+# --- Rodar scraper.py automaticamente antes de carregar os dados ---
+SCRAPER_FILE = "scraper.py"
+if os.path.exists(SCRAPER_FILE):
+    print("Executando scraper para atualizar boletim...")
+    subprocess.run([sys.executable, SCRAPER_FILE], check=True)
+else:
+    print("Arquivo scraper.py não encontrado. Continuando com o CSV existente.")
 
 # --- Função para sempre retornar JSON com acentos ---
 def json_response(data, status=200):
