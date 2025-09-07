@@ -91,40 +91,50 @@ def get_forecast(lat, lon, data, hora=None):
         "periodo_ondas_s": None
     }
 
-    # Extrair índice da hora desejada
+    # Extrair índice da hora desejada (meteorologia)
     if "hourly" in weather_data:
         times = weather_data["hourly"]["time"]
         alvo = f"{data}T{hora_consulta}"
-        if alvo not in times:
-            hora_proxima = min(times, key=lambda h: abs(datetime.fromisoformat(h) - datetime.fromisoformat(alvo)))
-        else:
-            hora_proxima = alvo
-        idx = times.index(hora_proxima)
-        forecast.update({
-            "temperatura_c": weather_data["hourly"]["temperature_2m"][idx],
-            "sensacao_termica_c": weather_data["hourly"]["apparent_temperature"][idx],
-            "velocidade_vento_kmh": weather_data["hourly"]["windspeed_10m"][idx],
-            "direcao_vento_graus": weather_data["hourly"]["winddirection_10m"][idx],
-            "chuva_mm": weather_data["hourly"]["precipitation"][idx],
-            "cobertura_nuvens_pct": weather_data["hourly"]["cloudcover"][idx]
-        })
+        if alvo in times:
+            idx = times.index(alvo)
+            forecast.update({
+                "temperatura_c": weather_data["hourly"]["temperature_2m"][idx],
+                "sensacao_termica_c": weather_data["hourly"]["apparent_temperature"][idx],
+                "velocidade_vento_kmh": weather_data["hourly"]["windspeed_10m"][idx],
+                "direcao_vento_graus": weather_data["hourly"]["winddirection_10m"][idx],
+                "chuva_mm": weather_data["hourly"]["precipitation"][idx],
+                "cobertura_nuvens_pct": weather_data["hourly"]["cloudcover"][idx]
+            })
 
+    # Extrair índice da hora desejada (marinha)
     if "hourly" in marine_data:
         times = marine_data["hourly"]["time"]
         alvo = f"{data}T{hora_consulta}"
-        if alvo not in times:
-            hora_proxima = min(times, key=lambda h: abs(datetime.fromisoformat(h) - datetime.fromisoformat(alvo)))
-        else:
-            hora_proxima = alvo
-        idx = times.index(hora_proxima)
-        forecast.update({
-            "altura_ondas_m": marine_data["hourly"]["wave_height"][idx],
-            "direcao_ondas_graus": marine_data["hourly"]["wave_direction"][idx],
-            "periodo_ondas_s": marine_data["hourly"]["wave_period"][idx]
-        })
+        if alvo in times:
+            idx = times.index(alvo)
+            forecast.update({
+                "altura_ondas_m": marine_data["hourly"]["wave_height"][idx],
+                "direcao_ondas_graus": marine_data["hourly"]["wave_direction"][idx],
+                "periodo_ondas_s": marine_data["hourly"]["wave_period"][idx]
+            })
+
+    # Se todos os dados estiverem None, significa que a previsão não está disponível
+    if all(value is None for key, value in forecast.items() if key not in ["data", "hora_consulta"]):
+        forecast = {
+            "mensagem": f"Previsão meteorológica e marinha não disponível para {data} e hora {hora_consulta}",
+            "data": data,
+            "hora_consulta": hora_consulta
+        }
 
     return forecast
 
+
+# --- Função para extrair código da praia ---
+def extrair_codigo(praia):
+    # Caso exista campo 'Codigo', usa ele; senão extrai do Nome (ex: "05L - P. do Futuro")
+    if "Codigo" in praia and praia["Codigo"]:
+        return praia["Codigo"]
+    return praia["Nome"].split(" ")[0]  # ex: "05L"
 
 # --- Rotas ---
 
@@ -162,52 +172,26 @@ def listar_praias():
     return json_response(praias_resumo)
  
 #buscar praia pelo id
+
 @app.route("/praias/<int:id>")
 def buscar_praia_por_id(id):
-    #query params: ?data=YYYY-MM-DD&hora=HH:MM
-    data = request.args.get("data")
-    hora = request.args.get("hora", "12:00")  # padrão meio-dia
-    
-    if not data:
-        return json_response({"message": "É necessário informar a data no formato YYYY-MM-DD"}, 400)
-    
-    
     praia = next((p for p in praias if p["id"] == id), None)
     if not praia:
+
         return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
-    
-    codigo = praia["Codigo"] if "Codigo" in praia else None
-    if not codigo or codigo not in COORDENADAS_POR_CODIGO:
-        return json_response({"message": "Coordenadas da praia não disponíveis"}), 500
-    
-    lat_str, lon_str = COORDENADAS_POR_CODIGO[codigo].split(", ")
-    lat, lon = float(lat_str), float(lon_str)
-
-    forecast = get_forecast(lat, lon, data, hora)
    
-    # Checar boletim Semace
-    boletim_disponivel = data in str(praia["Dias_Periodo"]).split(", ")
-    if not boletim_disponivel:
-        resposta = {
-            "boletim": f"Não há boletim da Semace disponível para {data}",
-            "previsao": forecast
-        }
-    else:
-        resposta = {
-            "boletim": praia,
-            "previsao": forecast
-        }
+    return json_response(praia)
 
-    return json_response(resposta)
    
 
 #buscar informações das praias pelo id e data
 #buscar informações das praias pelo id e data
 @app.route("/praias/<int:id>/data")
 def buscar_praia_por_id_e_data(id):
-    #query params: ?data=YYYY-MM-DD&hora=HH:MM
+    #query params: ?data=YYYY-MM-DD&hora=HH:MM 
     data = request.args.get("data")
     hora = request.args.get("hora", "12:00")  # padrão meio-dia
+
     if not data:
         return json_response({"message": "É necessário informar a data no formato YYYY-MM-DD"}, 400)
 
@@ -215,27 +199,25 @@ def buscar_praia_por_id_e_data(id):
     if not praia:
         return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
 
-    codigo = praia["Nome"].split(" ")[0]  #ex: "05L"
+    # Extrai código da praia
+    codigo = praia.get("Codigo") or praia["Nome"].split(" ")[0]  # ex: "05L"
     if not codigo or codigo not in COORDENADAS_POR_CODIGO:
         return json_response({"message": "Coordenadas da praia não disponíveis"}, 500)
 
     lat_str, lon_str = COORDENADAS_POR_CODIGO[codigo].split(", ")
     lat, lon = float(lat_str), float(lon_str)
 
+    #obter previsão meteorológica e marinha
     forecast = get_forecast(lat, lon, data, hora)
 
-    # Checar boletim Semace
+    #checar boletim Semace
     boletim_disponivel = data in str(praia["Dias_Periodo"]).split(", ")
-    if not boletim_disponivel:
-        resposta = {
-            "boletim": f"Não há boletim da Semace disponível para {data}",
-            "previsao": forecast
-        }
-    else:
-        resposta = {
-            "boletim": praia,
-            "previsao": forecast
-        }
+    boletim = praia if boletim_disponivel else f"Não há boletim da Semace disponível para {data}"
+
+    resposta = {
+        "boletim": boletim,
+        "previsao": forecast
+    }
 
     return json_response(resposta)
 
