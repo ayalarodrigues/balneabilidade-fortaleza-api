@@ -7,6 +7,11 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False #para suportar acentos
 
 
+# --- Função para sempre retornar JSON com acentos ---
+def json_response(data, status=200):
+    return Response(json.dumps(data, ensure_ascii=False), status=status, mimetype="application/json")
+
+
 # --- Carregar os dados gerados pelo scraper ---
 CSV_FILE = "boletim_fortaleza.csv"
 try:
@@ -53,19 +58,17 @@ def listar_praias():
         {"id": p["id"], "nome": p["Nome"], "zona": p["Zona"]}
         for p in praias
     ]
-    #isso aqui é apenas para corrigir o problema dos acentos gráficos
-    return Response(
-    json.dumps(praias_resumo, ensure_ascii=False),
-    mimetype='application/json'
-)
 
+    return json_response(praias_resumo)
+ 
 #buscar praia pelo id
 @app.route("/praias/<int:id>")
 def buscar_praia_por_id(id):
     praia = next((p for p in praias if p["id"] == id), None)
     if not praia:
-        return jsonify({"message": f"Nenhuma praia encontrada com id {id}"}), 404
-    return jsonify(praia)
+        return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
+   
+    return json_response(praia)
 
 #buscar informações das praias pelo id e data
 @app.route("/praias/<int:id>/data")
@@ -74,12 +77,12 @@ def buscar_praia_por_id_e_data(id):
     data = request.args.get("data")
     praia = next((p for p in praias if p["id"] == id), None)
     if not praia:
-        return jsonify({"message": f"Nenhuma praia encontrada com id {id}"}), 404
+        return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
 
     if data and data not in str(praia["Dias_Periodo"]).split(", "):
-        return jsonify({"message": f"A praia com id {id} não possui boletim para {data}"}), 404
+        return json_response({"message": f"A praia com id {id} não possui boletim para {data}"}), 404
 
-    return jsonify(praia)
+    return json_response(praia)
 
 #buscar praia por status com data opcional
 @app.route("/praias/status/<status>")
@@ -91,7 +94,7 @@ def filtrar_por_status(status):
     }
     status_filtrado = status_map.get(status.lower())
     if not status_filtrado:
-        return jsonify({"message": "Status inválido. Use 'propria' ou 'impropria'."}), 400
+        return json_response({"message": "Status inválido. Use 'propria' ou 'impropria'."}), 400
 
     resultado = [p for p in praias if p["Status"] == status_filtrado]
 
@@ -99,9 +102,9 @@ def filtrar_por_status(status):
         resultado = [p for p in resultado if data in str(p["Dias_Periodo"]).split(", ")]
 
     if not resultado:
-        return jsonify({"message": f"Nenhuma praia encontrada com status {status_filtrado}"}), 404
+        return json_response({"message": f"Nenhuma praia encontrada com status {status_filtrado}"}), 404
 
-    return jsonify(resultado)
+    return json_response(resultado)
 
 
 #buscar praias por zona geográfica (Leste, Centro, Oeste) e data opcional (?data=YYYY-MM-DD)
@@ -116,9 +119,9 @@ def filtrar_por_zona(zona):
         resultado = [p for p in resultado if data in str(p["Dias_Periodo"]).split(", ")]
 
     if not resultado:
-        return jsonify({"message": f"Nenhuma praia encontrada na zona {zona_filtrada}"}), 404
+        return json_response({"message": f"Nenhuma praia encontrada na zona {zona_filtrada}"}), 404
 
-    return jsonify(resultado)
+    return json_response(resultado)
 
 
 
