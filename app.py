@@ -80,7 +80,27 @@ def buscar_praia_por_id_e_data(id):
 
     return jsonify(praia)
 
+#buscar praia por status com data opcional
+@app.route("/praias/status/<status>")
+def filtrar_por_status(status):
+    data = request.args.get("data")
+    status_map = {
+        "propria": "Própria para banho",
+        "impropria": "Imprópria para banho"
+    }
+    status_filtrado = status_map.get(status.lower())
+    if not status_filtrado:
+        return jsonify({"message": "Status inválido. Use 'propria' ou 'impropria'."}), 400
 
+    resultado = [p for p in praias if p["Status"] == status_filtrado]
+
+    if data:
+        resultado = [p for p in resultado if data in str(p["Dias_Periodo"]).split(", ")]
+
+    if not resultado:
+        return jsonify({"message": f"Nenhuma praia encontrada com status {status_filtrado}"}), 404
+
+    return jsonify(resultado)
 
 
 
