@@ -6,6 +6,7 @@ import subprocess
 import os
 import sys
 import requests
+from coordenadas import COORDENADAS_POR_CODIGO
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False #para suportar acentos
@@ -163,25 +164,81 @@ def listar_praias():
 #buscar praia pelo id
 @app.route("/praias/<int:id>")
 def buscar_praia_por_id(id):
+    #query params: ?data=YYYY-MM-DD&hora=HH:MM
+    data = request.args.get("data")
+    hora = request.args.get("hora", "12:00")  # padrão meio-dia
+    
+    if not data:
+        return json_response({"message": "É necessário informar a data no formato YYYY-MM-DD"}, 400)
+    
+    
     praia = next((p for p in praias if p["id"] == id), None)
     if not praia:
         return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
-   
-    return json_response(praia)
+    
+    codigo = praia["Codigo"] if "Codigo" in praia else None
+    if not codigo or codigo not in COORDENADAS_POR_CODIGO:
+        return json_response({"message": "Coordenadas da praia não disponíveis"}), 500
+    
+    lat_str, lon_str = COORDENADAS_POR_CODIGO[codigo].split(", ")
+    lat, lon = float(lat_str), float(lon_str)
 
+    forecast = get_forecast(lat, lon, data, hora)
+   
+    # Checar boletim Semace
+    boletim_disponivel = data in str(praia["Dias_Periodo"]).split(", ")
+    if not boletim_disponivel:
+        resposta = {
+            "boletim": f"Não há boletim da Semace disponível para {data}",
+            "previsao": forecast
+        }
+    else:
+        resposta = {
+            "boletim": praia,
+            "previsao": forecast
+        }
+
+    return json_response(resposta)
+   
+
+#buscar informações das praias pelo id e data
 #buscar informações das praias pelo id e data
 @app.route("/praias/<int:id>/data")
 def buscar_praia_por_id_e_data(id):
-    #query param: ?data=YYYY-MM-DD
+    #query params: ?data=YYYY-MM-DD&hora=HH:MM
     data = request.args.get("data")
+    hora = request.args.get("hora", "12:00")  # padrão meio-dia
+    if not data:
+        return json_response({"message": "É necessário informar a data no formato YYYY-MM-DD"}, 400)
+
     praia = next((p for p in praias if p["id"] == id), None)
     if not praia:
         return json_response({"message": f"Nenhuma praia encontrada com id {id}"}), 404
 
-    if data and data not in str(praia["Dias_Periodo"]).split(", "):
-        return json_response({"message": f"A praia com id {id} não possui boletim para {data}"}), 404
+    codigo = praia["Nome"].split(" ")[0]  #ex: "05L"
+    if not codigo or codigo not in COORDENADAS_POR_CODIGO:
+        return json_response({"message": "Coordenadas da praia não disponíveis"}, 500)
 
-    return json_response(praia)
+    lat_str, lon_str = COORDENADAS_POR_CODIGO[codigo].split(", ")
+    lat, lon = float(lat_str), float(lon_str)
+
+    forecast = get_forecast(lat, lon, data, hora)
+
+    # Checar boletim Semace
+    boletim_disponivel = data in str(praia["Dias_Periodo"]).split(", ")
+    if not boletim_disponivel:
+        resposta = {
+            "boletim": f"Não há boletim da Semace disponível para {data}",
+            "previsao": forecast
+        }
+    else:
+        resposta = {
+            "boletim": praia,
+            "previsao": forecast
+        }
+
+    return json_response(resposta)
+
 
 #buscar praia por status com data opcional
 @app.route("/praias/status/<status>")
