@@ -5,6 +5,7 @@ import pandas as pd
 import subprocess
 import os
 import sys
+import requests
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False #para suportar acentos
@@ -34,6 +35,94 @@ praias = df.to_dict(orient="records")
 df = pd.read_csv(CSV_FILE, encoding='utf-8')
 
 
+# --- Função para obter previsão do tempo e marinha ---
+def get_forecast(lat, lon, data, hora=None):
+    """
+    Retorna previsão meteorológica e marinha para a latitude/longitude fornecida
+    na data e hora desejadas.
+    
+    Unidades:
+        - temperatura: °C
+        - sensação térmica: °C
+        - velocidade do vento: km/h
+        - direção do vento: graus
+        - chuva: mm
+        - cobertura de nuvens: %
+        - altura das ondas: metros
+        - direção das ondas: graus
+        - período das ondas: segundos
+    """
+    hora_consulta = hora if hora else "12:00"  # padrão meio-dia
+
+    # URLs das APIs Open-Meteo
+    weather_url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}&hourly=temperature_2m,apparent_temperature,"
+        "windspeed_10m,winddirection_10m,precipitation,cloudcover"
+        f"&start_date={data}&end_date={data}&timezone=America/Fortaleza"
+    )
+
+    marine_url = (
+        f"https://marine-api.open-meteo.com/v1/marine?"
+        f"latitude={lat}&longitude={lon}&hourly=wave_height,wave_direction,wave_period"
+        f"&start_date={data}&end_date={data}&timezone=America/Fortaleza"
+    )
+
+    # Requisições
+    weather_response = requests.get(weather_url)
+    marine_response = requests.get(marine_url)
+
+    weather_data = weather_response.json() if weather_response.status_code == 200 else {}
+    marine_data = marine_response.json() if marine_response.status_code == 200 else {}
+
+    # Estrutura padrão do retorno
+    forecast = {
+        "data": data,
+        "hora_consulta": hora_consulta,
+        "temperatura_c": None,
+        "sensacao_termica_c": None,
+        "velocidade_vento_kmh": None,
+        "direcao_vento_graus": None,
+        "chuva_mm": None,
+        "cobertura_nuvens_pct": None,
+        "altura_ondas_m": None,
+        "direcao_ondas_graus": None,
+        "periodo_ondas_s": None
+    }
+
+    # Extrair índice da hora desejada
+    if "hourly" in weather_data:
+        times = weather_data["hourly"]["time"]
+        alvo = f"{data}T{hora_consulta}"
+        if alvo not in times:
+            hora_proxima = min(times, key=lambda h: abs(datetime.fromisoformat(h) - datetime.fromisoformat(alvo)))
+        else:
+            hora_proxima = alvo
+        idx = times.index(hora_proxima)
+        forecast.update({
+            "temperatura_c": weather_data["hourly"]["temperature_2m"][idx],
+            "sensacao_termica_c": weather_data["hourly"]["apparent_temperature"][idx],
+            "velocidade_vento_kmh": weather_data["hourly"]["windspeed_10m"][idx],
+            "direcao_vento_graus": weather_data["hourly"]["winddirection_10m"][idx],
+            "chuva_mm": weather_data["hourly"]["precipitation"][idx],
+            "cobertura_nuvens_pct": weather_data["hourly"]["cloudcover"][idx]
+        })
+
+    if "hourly" in marine_data:
+        times = marine_data["hourly"]["time"]
+        alvo = f"{data}T{hora_consulta}"
+        if alvo not in times:
+            hora_proxima = min(times, key=lambda h: abs(datetime.fromisoformat(h) - datetime.fromisoformat(alvo)))
+        else:
+            hora_proxima = alvo
+        idx = times.index(hora_proxima)
+        forecast.update({
+            "altura_ondas_m": marine_data["hourly"]["wave_height"][idx],
+            "direcao_ondas_graus": marine_data["hourly"]["wave_direction"][idx],
+            "periodo_ondas_s": marine_data["hourly"]["wave_period"][idx]
+        })
+
+    return forecast
 
 
 # --- Rotas ---
@@ -135,4 +224,8 @@ def filtrar_por_zona(zona):
 
 
 
-app.run(port=5000)
+if __name__ == "__main__":
+    lat, lon = -3.7227, -38.4793  # Praia do Futuro
+    dados = get_forecast(lat, lon, "2025-09-10", "14:00")
+    print(json.dumps(dados, indent=4, ensure_ascii=False))
+    app.run(port=5000)
