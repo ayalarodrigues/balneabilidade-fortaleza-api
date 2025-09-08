@@ -290,21 +290,62 @@ def filtrar_por_status(status):
 
     return json_response(resposta)
 
-#buscar praias por zona geográfica (Leste, Centro, Oeste) e data opcional (?data=YYYY-MM-DD)
+#buscar praias por zona geográfica e data opcional com previsão meteorológica
 @app.route("/praias/zona/<zona>")
 def filtrar_por_zona(zona):
+    """
+    Filtra praias por zona. Comportamento similar a /praias/status:
+    - Se 'data' for informada, inclui 'previsao' quando possível.
+    - Se 'data' não for informada, não inclui 'previsao' (evita null).
+    """
     data = request.args.get("data")
-    zona_filtrada = zona.capitalize()
+    hora = request.args.get("hora", "12:00")
 
+    zona_filtrada = zona.capitalize()
     resultado = [p for p in praias if p["Zona"] == zona_filtrada]
 
+    # Se data for passada, filtra por boletins dessa data
     if data:
         resultado = [p for p in resultado if data in str(p["Dias_Periodo"]).split(", ")]
 
-    if not resultado:
+    # Sem resultados e sem data => 404
+    if not resultado and not data:
         return json_response({"message": f"Nenhuma praia encontrada na zona {zona_filtrada}"}), 404
 
-    return json_response(resultado)
+    resposta = []
+    for praia in resultado:
+        # Sem data: não buscamos previsão, apenas fornecemos instrução
+        if not data:
+            resposta.append({
+                "praia": praia,
+                "info": "Para obter previsão, informe ?data=YYYY-MM-DD&hora=HH:MM (hora opcional)."
+            })
+            continue
+
+        # Com data: tenta obter previsão via coordenadas
+        codigo = extrair_codigo(praia)
+        if codigo and codigo in COORDENADAS_POR_CODIGO:
+            lat_str, lon_str = COORDENADAS_POR_CODIGO[codigo].split(", ")
+            lat, lon = float(lat_str), float(lon_str)
+
+            forecast = get_forecast(lat, lon, data, hora)
+        else:
+            forecast = {"mensagem": "Coordenadas não disponíveis"}
+
+        boletim_disponivel = data in str(praia["Dias_Periodo"]).split(", ")
+
+        if not boletim_disponivel and (not forecast or "mensagem" in forecast):
+            resposta.append({
+                "praia": praia["Nome"],
+                "mensagem": f"Não há dados disponíveis para {data}"
+            })
+        else:
+            resposta.append({
+                "praia": praia,
+                "previsao": forecast
+            })
+
+    return json_response(resposta)
 
 
 
