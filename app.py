@@ -145,18 +145,48 @@ def home():
         "message": "API de Balneabilidade - Fortaleza",
         "info": (
             "Cada praia tem um identificador numérico único (id). "
-            "Use o endpoint /praias para listar todos os ids e nomes, "
-            "e consulte informações detalhadas usando o id."
+            "Use os endpoints abaixo para listar praias e obter informações detalhadas."
         ),
-        "example": {
-            "listagem": "/praias",
-            "busca_por_id": "/praias/5",
-            "busca_por_id_com_data": "/praias/5/data?data=2025-09-01",
-            "busca_por_status": "/praias/status/propria?data=2025-09-01",
-            "busca_por_zona": "/praias/zona/Leste?data=2025-09-01"
+        "endpoints": {
+            "/praias": {
+                "descricao": "Lista todas as praias",
+                "metodo": "GET"
+            },
+            "/praias/<id>": {
+                "descricao": "Busca informações de uma praia pelo ID",
+                "metodo": "GET",
+                "exemplo": "/praias/5"
+            },
+            "/praias/<id>/data": {
+                "descricao": "Busca informações da praia por ID e data (opcional: hora)",
+                "metodo": "GET",
+                "query_params": {
+                    "data": "YYYY-MM-DD (obrigatório)",
+                    "hora": "HH:MM (opcional, padrão 12:00)"
+                },
+                "exemplo": "/praias/5/data?data=2025-09-01&hora=14:00"
+            },
+            "/praias/status/<status>": {
+                "descricao": "Filtra praias pelo status ('propria' ou 'impropria')",
+                "metodo": "GET",
+                "query_params": {
+                    "data": "YYYY-MM-DD (opcional)",
+                    "hora": "HH:MM (opcional, padrão 12:00)"
+                },
+                "exemplo": "/praias/status/propria?data=2025-09-01&hora=12:00"
+            },
+            "/praias/zona/<zona>": {
+                "descricao": "Filtra praias por zona",
+                "metodo": "GET",
+                "query_params": {
+                    "data": "YYYY-MM-DD (opcional)",
+                    "hora": "HH:MM (opcional, padrão 12:00)"
+                },
+                "exemplo": "/praias/zona/Leste?data=2025-09-01&hora=12:00"
+            }
         }
     }
-    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype='application/json') #correção de acentos
+    return Response(json.dumps(data, ensure_ascii=False, indent=4), mimetype='application/json')
     # - ensure_ascii=False: mantém os caracteres acentuados legíveis
     # - indent=4: deixa o JSON formatado, mais fácil de ler
     #retorna um Response com mimetype 'application/json'
