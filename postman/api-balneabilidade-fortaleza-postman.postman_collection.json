@@ -1,0 +1,286 @@
+{
+	"info": {
+		"_postman_id": "dbf8f70b-eb93-437b-ace4-d9dcbc60dfc5",
+		"name": "api-balneabilidade-fortaleza-postman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39775470"
+	},
+	"item": [
+		{
+			"name": "Praias",
+			"item": [
+				{
+					"name": "Listar Todas as Praias",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/praias",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"praias"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "[{\"id\":1,\"nome\":\"Praia do Futuro\",\"zona\":\"Leste\",\"status\":\"Própria\"},{\"id\":2,\"nome\":\"Iracema\",\"zona\":\"Leste\",\"status\":\"Imprópria\"}]"
+						}
+					]
+				},
+				{
+					"name": "Buscar Praia por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/praias/1",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"praias",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{\"id\":1,\"nome\":\"Praia do Futuro\",\"zona\":\"Leste\",\"status\":\"Própria\"}"
+						}
+					]
+				},
+				{
+					"name": "Buscar Praia por ID e Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/praias/13/data?data=2025-09-05&hora=10:00",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"praias",
+								"13",
+								"data"
+							],
+							"query": [
+								{
+									"key": "data",
+									"value": "2025-09-05"
+								},
+								{
+									"key": "hora",
+									"value": "10:00"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{\"id\":13,\"nome\":\"Meireles\",\"zona\":\"Oeste\",\"status\":\"Própria\",\"data\":\"2025-09-05\",\"hora\":\"10:00\"}"
+						}
+					]
+				},
+				{
+					"name": "Buscar Praias por Zona",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/praias/zona/Oeste?data=2025-09-05&hora=13:00",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"praias",
+								"zona",
+								"Oeste"
+							],
+							"query": [
+								{
+									"key": "data",
+									"value": "2025-09-05"
+								},
+								{
+									"key": "hora",
+									"value": "13:00"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "[{\"id\":13,\"nome\":\"Meireles\",\"zona\":\"Oeste\",\"status\":\"Própria\"},{\"id\":14,\"nome\":\"Mucuripe\",\"zona\":\"Oeste\",\"status\":\"Própria\"}]"
+						}
+					]
+				},
+				{
+					"name": "Buscar Praias por Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/praias/status/propria?data=2025-09-01&hora=13:00",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"praias",
+								"status",
+								"propria"
+							],
+							"query": [
+								{
+									"key": "data",
+									"value": "2025-09-01"
+								},
+								{
+									"key": "hora",
+									"value": "13:00"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "[{\"id\":1,\"nome\":\"Praia do Futuro\",\"zona\":\"Leste\",\"status\":\"Própria\"},{\"id\":13,\"nome\":\"Meireles\",\"zona\":\"Oeste\",\"status\":\"Própria\"}]"
+						}
+					]
+				},
+				{
+					"name": "Status da API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Exemplo",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "200 OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{\"status\":\"API rodando\"}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
