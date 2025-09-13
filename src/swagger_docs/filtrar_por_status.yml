@@ -1,0 +1,28 @@
+tags:
+  - Filtros
+summary: Filtrar praias por Status
+description: Retorna uma lista de praias filtradas por status. Se uma data for fornecida, inclui a previsão.
+parameters:
+  - name: status
+    in: path
+    type: string
+    required: true
+    description: O status de balneabilidade para filtrar.
+    enum: [propria, impropria]
+  - name: data
+    in: query
+    type: string
+    required: false
+    description: Data para incluir a previsão (formato YYYY-MM-DD).
+  - name: hora
+    in: query
+    type: string
+    required: false
+    description: Hora para a previsão (formato HH:MM).
+responses:
+  200:
+    description: Lista de praias com o status especificado.
+  400:
+    description: Status inválido.
+  404:
+    description: Nenhuma praia encontrada para os critérios.

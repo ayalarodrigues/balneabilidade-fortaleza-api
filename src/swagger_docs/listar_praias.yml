@@ -1,0 +1,7 @@
+tags:
+  - Praias
+summary: Listar todas as praias (Resumo)
+description: Retorna uma lista resumida de todas as praias monitoradas, contendo ID, nome e zona.
+responses:
+  200:
+    description: Lista de praias resumida.

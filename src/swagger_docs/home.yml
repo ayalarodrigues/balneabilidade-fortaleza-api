@@ -1,0 +1,7 @@
+tags:
+  - Geral
+summary: Endpoint Raiz da API
+description: Retorna uma mensagem de boas-vindas e um link para a documentação interativa.
+responses:
+  200:
+    description: Mensagem de boas-vindas da API.

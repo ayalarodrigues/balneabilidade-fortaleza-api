@@ -1,0 +1,27 @@
+tags:
+  - Previsão do Tempo
+summary: Obter dados de uma praia por ID em uma data específica
+description: Retorna os dados do boletim da SEMACE e a previsão do tempo para uma praia em uma data.
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: O ID numérico da praia.
+  - name: data
+    in: query
+    type: string
+    required: true
+    description: Data para a consulta (formato YYYY-MM-DD).
+  - name: hora
+    in: query
+    type: string
+    required: false
+    description: Hora para a consulta (formato HH:MM, padrão 12:00).
+responses:
+  200:
+    description: Dados do boletim e previsão do tempo para a praia e data.
+  400:
+    description: Parâmetro 'data' não foi fornecido.
+  404:
+    description: Praia não encontrada para o ID fornecido.

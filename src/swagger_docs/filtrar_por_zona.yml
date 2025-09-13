@@ -1,0 +1,26 @@
+tags:
+  - Filtros
+summary: Filtrar praias por Zona
+description: Retorna uma lista de praias filtradas por zona. Se uma data for fornecida, inclui a previsão.
+parameters:
+  - name: zona
+    in: path
+    type: string
+    required: true
+    description: A zona geográfica para filtrar.
+    enum: [Leste, Centro, Oeste]
+  - name: data
+    in: query
+    type: string
+    required: false
+    description: Data para incluir a previsão (formato YYYY-MM-DD).
+  - name: hora
+    in: query
+    type: string
+    required: false
+    description: Hora para a previsão (formato HH:MM).
+responses:
+  200:
+    description: Lista de praias na zona especificada.
+  404:
+    description: Nenhuma praia encontrada para os critérios.

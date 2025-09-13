@@ -1,0 +1,15 @@
+tags:
+  - Praias
+summary: Buscar praia por ID
+description: Retorna os detalhes completos de uma praia específica com base no seu ID numérico.
+parameters:
+  - name: id
+    in: path
+    type: integer
+    required: true
+    description: O ID numérico da praia a ser consultada.
+responses:
+  200:
+    description: Detalhes da praia encontrada.
+  404:
+    description: Praia não encontrada para o ID fornecido.
