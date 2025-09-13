@@ -1,6 +1,6 @@
 import pytest, json
 from datetime import datetime
-from app import app
+from src.app import app
 import sys, os
 
 #Testa se a rota raiz retorna 200 e contém mensagem

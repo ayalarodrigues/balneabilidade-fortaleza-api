@@ -1,8 +1,8 @@
 import sys, os
 import pytest
-from app import app
 from datetime import datetime
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+from src.app import app
 
 # --- Fixture ---
 
