@@ -59,7 +59,7 @@ Para a correta utilização da API, é fundamental compreender a periodicidade e
 
 * **Boletins da SEMACE (Balneabilidade)**: Os dados de balneabilidade são baseados nos boletins semanais da SEMACE. A API foi projetada para buscar e processar sempre o boletim mais recente disponível publicamente. Contudo, a própria SEMACE pode não atualizar os boletins em uma data rigorosamente fixa. Isso significa que pode haver um pequeno atraso na publicação, e o boletim mais recente pode ainda se referir à semana anterior. Se um usuário solicitar uma data para a qual o boletim ainda não foi liberado, a API retornará os dados do último período válido.
 
-* **API Open-Meteo (Previsão do Tempo)**: A previsão do tempo é fornecida em tempo real pela API Open-Meteo. Esta API oferece previsões para uma janela de tempo limitada (geralmente até 16 dias no futuro a partir da data atual). Portanto, não é possível obter previsões para datas muito distantes ou para o passado através deste endpoint. Se uma data fora desse intervalo for solicitada, a API indicará que os dados de previsão não estão disponíveis.
+* **API Open-Meteo (Previsão do Tempo)**: A previsão do tempo é fornecida em tempo real pela API Open-Meteo. Esta API oferece previsões para uma janela de tempo limitada (geralmente até 7 dias no futuro a partir da data atual). Portanto, não é possível obter previsões para datas muito distantes ou para o passado através deste endpoint. Se uma data fora desse intervalo for solicitada, a API indicará que os dados de previsão não estão disponíveis.
 
 ### Diagrama da Arquitetura
 
@@ -96,6 +96,61 @@ graph LR
     A -->|Requisição HTTP| B
     B -->|Resposta JSON Consolidada| A
 
+```
 
+## Instruções de Execução e Teste
 
+Siga os passos abaixo para executar a API localmente e realizar testes com o Postman.
 
+### 1. Executando a API Localmente
+
+#### Pré-requisitos:
+
+* Python 3.10+
+
+* Git
+
+#### Passos:
+
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/SEU-USUARIO/NOME-DO-REPOSITORIO.git
+cd NOME-DO-REPOSITORIO
+```
+2. Crie e ative um ambiente virtual:
+
+Windows: 
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+```
+macOS/Linux:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+3. Instale as dependências:
+O arquivo **requirements.txt** lista todas as bibliotecas necessárias. Instale-as com o comando:
+```bash
+pip install -r requirements.txt
+```
+4. Execute a Aplicação
+```bash
+python .\src\app.py 
+```
+A API estará rodando em **http://127.0.0.1:5000**.
+
+### 2. Instruções para Execução via Postman
+
+A coleção api-balneabilidade-fortaleza.postman_collection.json está na pasta **postman** do repositório para facilitar os testes.
+
+1. Com a API rodando localmente (passo anterior), abra o aplicativo Postman.
+
+2. Clique em  "File" e em seguinda em "Import" no canto superior esquerdo.
+
+3. Na janela que se abrir, navegue até a pasta do projeto e selecione o arquivo api-balneabilidade-fortaleza.postman_collection.json.
+
+4. Após a importação, uma nova coleção com todas as requisições da API aparecerá na sua barra lateral esquerda, já organizada em pastas.
+
+5. Clique em qualquer requisição (ex: "Listar Todas as Praias" dentro da pasta "Praias") e clique no botão "Send" para ver a resposta da API.
