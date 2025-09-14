@@ -6,6 +6,7 @@ import unicodedata
 from datetime import datetime, timedelta
 import camelot
 import pandas as pd
+import os
 
 from coordenadas import COORDENADAS_POR_CODIGO
 
@@ -77,11 +78,10 @@ ultimo_boletim_url = urljoin(url_base, links_boletim[0])
 #print("Último boletim:", ultimo_boletim_url)
 
 #--- Baixar o arquivo .pdf ---
-res = requests.get(ultimo_boletim_url, stream=True) #faz uma requisição HTTP para baixar o arquivo PDF do boletim
+res = requests.get(ultimo_boletim_url, stream=True)
 arquivo_pdf = "boletim_fortaleza.pdf"
 with open(arquivo_pdf, "wb") as f:
-    for chunk in res.iter_content(8192): #8192 = 8KB por vez
-        #o arquivo é baixo em partes(chunks) para evitar que seja carregado todo de uma vez na memória
+    for chunk in res.iter_content(8192):
         f.write(chunk)
 
 print(f"PDF salvo em {arquivo_pdf}")
@@ -247,9 +247,12 @@ print(f"Total de pontos SEM coordenadas mapeadas: {miss}")
 
 # --- Salvar os dados em .csv ---
 
-arquivo_csv = "boletim_fortaleza.csv"
-df.to_csv(arquivo_csv, index=False, encoding="utf-8")
-print(f"CSV salvo em: {arquivo_csv}")
+#caminho para a pasta raiz do projeto (uma pasta acima da atual)
+pasta_raiz = os.path.dirname(os.path.abspath(__file__))
+caminho_csv = os.path.join(os.path.dirname(pasta_raiz), "boletim_fortaleza.csv")
+
+df.to_csv(caminho_csv, index=False, encoding="utf-8")
+print(f"CSV salvo em: {caminho_csv}")
 
 #teste
 print("Prévia do CSV exportado:")
