@@ -179,6 +179,47 @@ Abaixo está uma tabela de referência rápida com os principais endpoints dispo
 | `GET`  | `/praias/status/{status}`     | Filtra praias por status (`propria` ou `impropria`). **Parâmetro opcional:** `?data=...` para incluir previsão. |
 | `GET`  | `/praias/zona/{zona}`         | Filtra praias pela zona (`Leste`, `Centro`, `Oeste`). **Parâmetro opcional:** `?data=...` para incluir previsão. |
 
+### Referência de IDs das Praias
+
+A tabela abaixo apresenta o mapeamento entre o `id` usado nos endpoints e a praia correspondente. Esses IDs são gerados de forma sequencial pelo script `scraper.py`, garantindo que cada praia tenha um identificador único para consultas na API.
+
+| ID  | Código | Nome da Praia | Zona |
+|-----|--------|---------------|------|
+| 1   | 01L | P. do Futuro – Praia do Caça e Pesca (rua Germiniano Jurema) | Leste |
+| 2   | 02L | P. do Futuro – Capela de Santa Terezinha (Posto GV 09) | Leste |
+| 3   | 03L | P. do Futuro – Rua Embratel (Posto GV 08) | Leste |
+| 4   | 04L | P. do Futuro – Rua Francisco Montenegro (Posto GV 06) | Leste |
+| 5   | 05L | P. do Futuro – Rua Antônio Atualpa Rodrigues | Leste |
+| 6   | 06L | P. do Futuro – Av. Carlos Jereissati | Leste |
+| 7   | 07L | P. do Futuro – Rua Gerôncio Brígido Neto (Posto GV 01) | Leste |
+| 8   | 08L | P. do Futuro – Rua Clóvis Mota (Clube dos Oficiais) | Leste |
+| 9   | 09L | P. do Futuro – Areninha Praia do Futuro I | Leste |
+| 10  | 10L | P. do Futuro – Rua Ismael Pordeus | Leste |
+| 11  | 11L | Praia do Titanzinho | Leste |
+| 12  | 32L | Praia da Abreulândia – Rua Teófilo Ramos | Leste |
+| 13  | 67L | Praia da Sabiaguaba – Rua Sabiaguaba | Leste |
+| 14  | 12C | Praia do Mucuripe – Porto dos Botes | Centro |
+| 15  | 13C | Praia do Mucuripe – Mercado dos Peixes | Centro |
+| 16  | 14C | Praia do Mucuripe – Estátua Iracema do Mucuripe | Centro |
+| 17  | 15C | Praia do Mucuripe – Jardim Japonês / Arena Beira Mar | Centro |
+| 18  | 16C | Praia do Meireles – Av. Desembargador Moreira (Feirinha) | Centro |
+| 19  | 17C | Praia do Meireles – Rua José Vilar (Posto GV 06) | Centro |
+| 20  | 18C | Praia do Meireles – Av. Rui Barbosa (Aterro) | Centro |
+| 21  | 19C | Praia de Iracema – Estátua de Iracema Guardiã | Centro |
+| 22  | 20C | Praia de Iracema – Av. Almirante Tamandaré (Ponte Metálica) | Centro |
+| 23  | 69C | Praia dos Crush – Centro Cultural Belchior | Centro |
+| 24  | 22O | Praia da Leste Oeste – Igreja de Santa Edwiges | Oeste |
+| 25  | 23O | Praia do Pirambu – Av. Filomeno Gomes | Oeste |
+| 26  | 24O | Praia da Formosa – Posto de Saúde Guiomar Arruda | Oeste |
+| 27  | 25O | Praia da Colônia – Final da Av. Pasteur (Arpoador) | Oeste |
+| 28  | 26O | Praia da Colônia – Praia do “L” (Rua Dr. Theberge) | Oeste |
+| 29  | 27O | Praia do Coqueirinho – Projeto 4 Varas (Horta) | Oeste |
+| 30  | 28O | Praia das Goiabeiras – Rua Coqueiro Verde | Oeste |
+| 31  | 29O | Barra do Ceará – Rua Bom Jesus | Oeste |
+| 32  | 30O | Barra do Ceará – Rua Rita das Goiabeiras | Oeste |
+| 33  | 31O | Barra do Ceará – Foz do Rio Ceará | Oeste |
+
+
 ## Documentação Adicional
 
 Esta seção contém informações complementares para a compreensão total do projeto, incluindo a estratégia de testes e a organização do código-fonte.
