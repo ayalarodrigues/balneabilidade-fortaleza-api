@@ -239,3 +239,13 @@ pytest -v
 ```
 ### Estrutura do Repositório
 O projeto segue uma estrutura organizada para separar o código-fonte, os testes e a documentação.
+
+### Papéis e Responsabilidades
+
+| Nome                 | Papel na Equipe                       | Responsabilidades                                                                 |
+|---------------------|--------------------------------------|----------------------------------------------------------------------------------|
+| Ayala Rodrigues | **Desenvolvedora**        | Implementação de toda a API, definição dos endpoints, testes unitários, tratamento de erros e documentação técnica. |
+| Francisco Eduardo Nogueira Nobre          | **Analista de Requisitos** | Acompanhou a definição do problema, ajudou a validar requisitos funcionais e não-funcionais e revisou se a solução atendia ao impacto social proposto. |
+| Manuela Rocha Trigueiro Asfor           | **UX Writer / Documentação**         | Auxiliou na redação do README.md, revisão ortográfica e clareza da documentação para facilitar a compreensão. |
+| Samara Lima Queiroz            | **Tester / QA**                      | Validou o funcionamento da API usando Postman, sugeriu casos de teste e conferiu se os endpoints estavam retornando dados corretos. |
+| Daniel Fabrício            | **Pesquisador**  | Pesquisou exemplos de APIs existentes, protocolos de integração (REST, SOAP, etc.) e trouxe referências para apoiar as decisões técnicas do projeto.|
