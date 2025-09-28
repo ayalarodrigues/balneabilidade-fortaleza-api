@@ -29,6 +29,35 @@ A solução contribui especificamente para a Meta 11.7, que visa "proporcionar o
 
 Ao transformar dados públicos brutos (boletins em PDF) em informação acessível via API, o projeto capacita cidadãos e turistas a tomar decisões informadas sobre o uso desses espaços. Saber se uma praia está 'Própria' ou 'Imprópria' para banho, combinado com a previsão do tempo, promove a segurança e a saúde, permitindo que todos desfrutem da orla de Fortaleza de forma mais consciente e segura.
 
+## Levantamento dos requisitos funcionais e não-funcionais
+Com base no problema identificado, foram definidos os seguintes requisitos para a API:
+
+### Requisitos Funcionais
+* RF01: A API deve extrair os dados do boletim de balneabilidade mais recente do site da SEMACE.
+
+* RF02: A API deve listar todas as praias monitoradas, retornando um resumo com ID, nome e zona.
+
+* RF03: A API deve permitir a busca de informações detalhadas de uma praia específica pelo seu ID.
+
+* RF04: A API deve permitir filtrar as praias pelo status de balneabilidade ("própria" ou "imprópria").
+
+* RF05: A API deve permitir filtrar as praias por zona geográfica (Leste, Centro, Oeste).
+
+* RF06: A API deve integrar-se a um sistema externo (Open-Meteo) para fornecer a previsão do tempo (temperatura, vento, chuva) e marinha (altura das ondas) para uma praia, data e hora específicas.
+
+* RF07: A API deve possuir documentação clara e interativa de suas rotas.
+
+* RF08: A API deve incluir testes unitários para validar o funcionamento de seus endpoints principais.
+
+### Requisitos Não-Funcionais
+* RNF01 - Desempenho: A API deve responder às requisições em um tempo aceitável. No entanto, há ciência de que rotas que consultam a API externa Open-Meteo em tempo real podem ter uma latência maior. O processo de `web scraping`, por ser executado apenas na inicialização da aplicação, não impacta o tempo de resposta das consultas subsequentes.
+
+* RNF02 - Disponibilidade: A disponibilidade da API depende de fontes externas: o site da SEMACE para os boletins e a API Open-Meteo para a previsão do tempo. O `README.md` informa sobre essas dependências, como possíveis atrasos na publicação dos boletins pela SEMACE.
+
+* RNF03 - Usabilidade: Para garantir a facilidade de uso, a API segue os padrões RESTful e fornece uma documentação interativa via `Swagger UI`, permitindo que os desenvolvedores explorem e testem os endpoints diretamente no navegador.
+
+* RNF04 - Tratamento de Erros: A API deve gerenciar erros de forma controlada, retornando códigos de *status* `HTTP` apropriados e mensagens claras, como `404 Not Found` para uma praia não encontrada ou `400 Bad Request` para parâmetros inválidos.
+
 ## Descrição funcional da solução
 
 A API de Balneabilidade de Fortaleza é uma ferramenta que centraliza e fornece dados sobre as condições das praias da cidade. Do ponto de vista funcional, a solução permite que um usuário final (ou outra aplicação) realize as seguintes operações:
